@@ -1,7 +1,9 @@
 const router = require('express').Router();
 const { models } = require('../Models');
+const validateJWT = require('../Middleware/validate-session');
 
-router.post('/campaign', async (req, res) => {
+//make new campaign
+router.post('/campaign', validateJWT, async (req, res) => {
 
     const {title, description, endDate, amount} = req.body.campaign;
 
@@ -24,6 +26,24 @@ router.post('/campaign', async (req, res) => {
     } catch (err) {
         res.status(500).json({
             error: `Failed to create campaign: ${err}`
+        });
+    };
+});
+
+//get all campaigns (no validate here)
+router.get('/', async (req, res) => {
+    try {
+        await models.CampaignsModel.findAll()
+        .then(
+            campaigns => {
+                res.status(200).json({
+                    campaigns: campaigns
+                });
+            }
+        )
+    } catch (err) {
+        res.status(500).json({
+            error: `Failed to retrieve users: ${err}`
         });
     };
 });
