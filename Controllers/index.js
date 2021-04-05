@@ -1,4 +1,5 @@
 module.exports = {
     usercontroller: require('./userController'),
-    transactionscontroller: require('./transactionsController')
+    transactionscontroller: require('./transactionsController'),
+    campaignscontroller: require('./campaignController')
 }
