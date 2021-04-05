@@ -114,7 +114,7 @@ router.put('/:id', validateJWT, async (req, res) => {
     try {
         await models.CampaignsModel.update(updatedCampaign, query);
         res.status(200).json({
-            message: `Log successfully updated.`
+            message: `Campaign successfully updated.`
         });
     } catch (err) {
         res.status(500).json({
