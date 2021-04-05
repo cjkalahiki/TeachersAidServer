@@ -3,9 +3,9 @@ const db = require('../db');
 
 const Campaigns = db.define('campaign', {
     id: {
-        type: DataTypes.UUID,
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
         primaryKey: true,
-        defaultValue: DataTypes.UUIDV4,
         allowNull: false
     },
     title: {
