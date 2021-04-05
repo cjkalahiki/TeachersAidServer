@@ -34,7 +34,7 @@ router.post('/campaign', validateJWT, async (req, res) => {
         };
     } else {
         res.status(403).json({
-            message: 'Permission not granted'
+            message: 'Permission denied.'
         })
     }
 
@@ -61,17 +61,25 @@ router.get('/allCampaigns', async (req, res) => {
 
 //get campaign by userID
 router.get('/', validateJWT, async (req,res) => {
-    const id = req.user.id;
-    
-    try {
-        const teacherCampaigns = await models.CampaignsModel.findAll({
-            where: {
-                userId: id
-            }
+    const permission = access.can(req.user.role).readOwn('campaign');
+
+    if (permission.granted) {
+        const id = req.user.id;
+        
+        try {
+            const teacherCampaigns = await models.CampaignsModel.findAll({
+                where: {
+                    userId: id
+                }
+            })
+            res.status(200).json(teacherCampaigns);
+        } catch (err) {
+            res.status(500).json({error: err})
+        }
+    } else {
+        res.status(403).json({
+            message: "Permission denied."
         })
-        res.status(200).json(teacherCampaigns);
-    } catch (err) {
-        res.status(500).json({error: err})
     }
 })
 
@@ -105,57 +113,77 @@ router.get('/:id', async(req,res) => {
 
 //update campaign by campaign ID
 router.put('/:id', validateJWT, async (req, res) => {
-    const {description, endDate, amount} = req.body.campaign;
-    const teacherId = req.user.id;
-    const campaignId = req.params.id;
 
-    const query = {
-        where: {
-            id: campaignId,
-            userId: teacherId
-        }
-    }
+    const permission = access.can(req.user.role).updateOwn('campaign');
 
-    const updatedCampaign = {
-        description: description,
-        endDate: endDate,
-        amount: amount
-    }
-
-    try {
-        await models.CampaignsModel.update(updatedCampaign, query);
-        res.status(200).json({
-            message: `Campaign successfully updated.`
-        });
-    } catch (err) {
-        res.status(500).json({
-            error: err
-        })
-    }
-});
-
-//delete by id
-router.delete('/:id', validateJWT, async (req, res) => {
-    const teacherId = req.user.id;
-    const campaignId = req.params.id;
-
-    try {
+    if (permission) {
+        const {description, endDate, amount} = req.body.campaign;
+        const teacherId = req.user.id;
+        const campaignId = req.params.id;
+    
         const query = {
             where: {
                 id: campaignId,
                 userId: teacherId
             }
-        };
-
-        await models.CampaignsModel.destroy(query);
-        res.status(200).json({
-            message: 'Campaign removed.'
-        });
-    } catch (err) {
-        res.status(500).json({
-            error: err
+        }
+    
+        const updatedCampaign = {
+            description: description,
+            endDate: endDate,
+            amount: amount
+        }
+    
+        try {
+            await models.CampaignsModel.update(updatedCampaign, query);
+            res.status(200).json({
+                message: `Campaign successfully updated.`
+            });
+        } catch (err) {
+            res.status(500).json({
+                error: err
+            })
+        }
+    } else {
+        res.status(403).json({
+            message: 'Permission denied.'
         })
-    };
+    }
+
+});
+
+//delete by id
+router.delete('/:id', validateJWT, async (req, res) => {
+
+    const permission = access.can(req.user.role).deleteOwn('campaign');
+
+    if (permission.granted){
+        const teacherId = req.user.id;
+        const campaignId = req.params.id;
+    
+        try {
+            const query = {
+                where: {
+                    id: campaignId,
+                    userId: teacherId
+                }
+            };
+    
+            await models.CampaignsModel.destroy(query);
+            res.status(200).json({
+                message: 'Campaign removed.'
+            });
+        } catch (err) {
+            res.status(500).json({
+                error: err
+            })
+        };
+    } else {
+        res.status(403).json({
+            message: 'Permission denied.'
+        })
+    }
+
 });
 
 module.exports = router;
