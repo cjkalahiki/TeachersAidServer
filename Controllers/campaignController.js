@@ -1,33 +1,44 @@
 const router = require('express').Router();
 const { models } = require('../Models');
 const validateJWT = require('../Middleware/validate-session');
+const access = require('../Middleware/roles');
 
 //make new campaign
 router.post('/campaign', validateJWT, async (req, res) => {
 
-    const {title, description, endDate, amount} = req.body.campaign;
+    const permission = access.can(req.user.role).createOwn('campaign');
 
-    try {
-        await models.CampaignsModel.create({
-            title: title,
-            description: description,
-            endDate: endDate,
-            amount: amount,
-            userId: req.user.id
+    if (permission.granted) {
+        const {title, description, endDate, amount} = req.body.campaign;
+    
+        try {
+            await models.CampaignsModel.create({
+                title: title,
+                description: description,
+                endDate: endDate,
+                amount: amount,
+                userId: req.user.id
+            })
+            .then(
+                campaign => {
+                    res.status(201).json({
+                        campaign: campaign,
+                        message: 'campaign successfully created'
+                    })
+                }
+            )
+        } catch (err) {
+            res.status(500).json({
+                error: `Failed to create campaign: ${err}`
+            });
+        };
+    } else {
+        res.status(403).json({
+            message: 'Permission not granted'
         })
-        .then(
-            campaign => {
-                res.status(201).json({
-                    campaign: campaign,
-                    message: 'campaign successfully created'
-                })
-            }
-        )
-    } catch (err) {
-        res.status(500).json({
-            error: `Failed to create campaign: ${err}`
-        });
-    };
+    }
+
+
 });
 
 //get all campaigns (no validate here)
