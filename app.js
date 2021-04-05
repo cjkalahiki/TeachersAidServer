@@ -14,7 +14,7 @@ app.use(express.json());
 //endpoints
 app.use('/users', controllers.usercontroller);
 // app.use(middleware.validateSession);
-// app.use('/transactions', controllers.transactionscontroller)
+app.use('/transactions', controllers.transactionscontroller)
 app.use('/campaigns', controllers.campaignscontroller);
 
 try {
