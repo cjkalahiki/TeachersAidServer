@@ -1,6 +1,6 @@
 const {Sequelize} = require('sequelize');
 
-const seqeulize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD, {
+const seqeulize = new Sequelize(process.env.DATABASE_URL, {
     dialect: process.env.DATABASE_DIALECT,
     ssl: process.env.ENVIRONMENT === 'production'
 })
