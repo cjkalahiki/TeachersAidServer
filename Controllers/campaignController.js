@@ -2,6 +2,7 @@ const router = require('express').Router();
 const { models } = require('../Models');
 const validateJWT = require('../Middleware/validate-session');
 const access = require('../Middleware/roles');
+const { model } = require('../db');
 
 //make new campaign
 router.post('/campaign', validateJWT, async (req, res) => {
@@ -44,14 +45,15 @@ router.post('/campaign', validateJWT, async (req, res) => {
 //get all campaigns (no validate here)
 router.get('/allCampaigns', async (req, res) => {
     try {
-        await models.CampaignsModel.findAll()
-        .then(
-            campaigns => {
-                res.status(200).json({
-                    campaigns: campaigns
-                });
-            }
-        )
+        const campaigns = await models.CampaignsModel.findAll({include: models.UserModel})
+        res.status(200).json({campaigns});
+        // .then(
+        //     campaigns => {
+        //         res.status(200).json({
+        //             campaigns: campaigns
+        //         });
+        //     }
+        // )
     } catch (err) {
         res.status(500).json({
             error: `Failed to retrieve users: ${err}`
