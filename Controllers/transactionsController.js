@@ -65,7 +65,7 @@ router.get('/', validateJWT, async (req, res) => {
 });
 
 //get transaction by id; for diving deeper into the info of a transaction, displaying one transaction 
-router.get('/:id', async (req,res) => {
+router.get('/:id', validateJWT, async (req,res) => {
 
     const permission = access.can(req.user.role).readOwn('transaction');
 
@@ -74,6 +74,7 @@ router.get('/:id', async (req,res) => {
     
         try {
             const query = await models.TransactionsModel.findOne({
+                include: models.CampaignsModel,
                 where: {
                     id: transactionId
                 }
