@@ -48,6 +48,7 @@ router.get('/', validateJWT, async (req, res) => {
     
         try {
             const donorTransactions = await models.TransactionsModel.findAll({
+                include: models.CampaignsModel,
                 where: {
                     userId: id
                 }
